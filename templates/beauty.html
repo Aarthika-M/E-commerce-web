@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Watches</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='watches.css') }}" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-left">
+    <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="shop-image">
+    <a href="{{ url_for('home') }}" class="brand">ShopBrand</a>
+  </div>
+
+  <ul class="nav-menu">
+    <li><a href="{{ url_for('home') }}">Home</a></li>
+    <li class="dropdown">
+      <a href="#" class="dropbtn">Categories</a>
+      <ul class="dropdown-content">
+        <li><a href="{{ url_for('watches') }}">Watches</a></li>
+        <li><a href="{{ url_for('beauty') }}">Beauty</a></li>
+        <li><a href="{{ url_for('dresses') }}">Dresses</a></li>
+      </ul>
+    </li>
+    <li><a href="{{ url_for('wishlist') }}">Wishlist</a></li>
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+  </ul>
+</nav>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- Page Heading -->
+<h2 class="heading">Beauty Collection</h2>
+
+<!-- Product Grid -->
+ {% if products %}
+ <div class="products-container">
+  {% for product in products %}
+  <div class="product-card">
+    <a href="{{ url_for('view_product_detail', product_id=product._id) }}">
+      <img src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" alt="{{ product.name }}">
+      <h3>{{ product.name }}</h3>
+    </a>
+    <p>{{ product.description }}</p>
+    <div class="price">₹{{ product.price }}</div>
+    <div class="offer">Offer: {{ product.offer }}% off</div>
+
+    <form method="POST" action="{{ url_for('buy_product') }}">
+      <input type="hidden" name="name" value="{{ product.name }}">
+      <button type="submit" class="buy-btn">Buy Now</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('add_to_wishlist') }}">
+      <input type="hidden" name="name" value="{{ product.name }}">
+      <input type="hidden" name="price" value="{{ product.price }}">
+      <input type="hidden" name="image" value="{{ product.image_filename }}">
+      <input type="hidden" name="category" value="beauty">
+      <button type="submit" class="wishlist-btn">♡ Wishlist</button>
+    </form>
+
+    <!-- ✅ Show remove only if role is admin -->
+    {% if session.get('role') == 'admin' %}
+    <form method="POST" action="{{ url_for('delete_product', product_id=product._id) }}">
+      <button type="submit" class="remove-btn">🗑 Remove</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% else  %}
+  <h1>No products found</h1>
+  {% endif %}
+
+
+</div>
+<script>
+  const dropdown = document.querySelector('.dropdown');
+  const dropdownContent = dropdown.querySelector('.dropdown-content');
+  let timeout;
+
+  dropdown.addEventListener('mouseenter', () => {
+    clearTimeout(timeout); // cancel hide if re-entered
+    dropdownContent.style.display = 'flex';
+  });
+
+  dropdown.addEventListener('mouseleave', () => {
+    timeout = setTimeout(() => {
+      dropdownContent.style.display = 'none';
+    }, 800); // keep open for 800ms after mouse leaves
+  });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home - ShopBrand</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}" />
+
+
+</head>
+
+<body>
+  <nav>
+    <div class="brand">
+    <img src="{{ url_for('static', filename='image/logo.png') }}" alt="fashions" class="shop-image" />
+
+      <span class="brand-name">ShopBrand</span>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button> 
+      <div class="nav-links" id="navLinks">
+    
+    <a href="/" style="color:white; text-decoration:none; font-size:18px;">Home</a>
+
+
+    
+    <div class="nav-links" id="navLinks">
+      <div class="dropdown">
+        <button class="dropbtn">User ▼</button>
+        <div class="dropdown-content">
+          <a href="/user/login">Login</a>
+          <a href="/user/register">Register</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropbtn">Admin ▼</button>
+        <div class="dropdown-content">
+          
+          <a href="/admin/login">Login</a>
+      
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+    <h1 class="shop-heading">Welcome to ShopBrand!</h1>
+        <img src="{{ url_for('static', filename='image/fashions.png') }}" alt="fashions" class="shop-image" />
+
+  </div>
+
+
+
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById('navLinks');
+      nav.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

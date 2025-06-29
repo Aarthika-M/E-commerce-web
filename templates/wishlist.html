@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wishlist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='wishlist.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-left">
+    <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="shop-image">
+    <a href="{{ url_for('home') }}" class="brand">ShopBrand</a>
+  </div>
+
+  <ul class="nav-menu">
+    <li><a href="{{ url_for('home') }}">Home</a></li>
+    <li class="dropdown">
+      <a href="javascript:void(0);" class="dropbtn" onclick="toggleDropdown()">Categories</a>
+      <ul class="dropdown-content" id="dropdownList">
+        <li><a href="{{ url_for('watches') }}">Watches</a></li>
+        <li><a href="{{ url_for('beauty') }}">Beauty</a></li>
+        <li><a href="{{ url_for('dresses') }}">Dresses</a></li>
+      </ul>
+    </li>
+    <li><a href="{{ url_for('wishlist') }}">Wishlist</a></li>
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+  </ul>
+</nav>
+
+<h2>Your Wishlist</h2>
+
+{% if wishlist %}
+<div class="wishlist-container">
+  {% for item in wishlist %}
+  <div class="wishlist-card">
+    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.name }}">
+    <h3>{{ item.name }}</h3>
+    <p>Category: {{ item.category }}</p>
+    <p>Price: ₹{{ item.price }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  <p class="no-items">No items in your wishlist.</p>
+{% endif %}
+
+<script>
+  function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownList");
+    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+      const dropdown = document.getElementById("dropdownList");
+      if (dropdown && dropdown.style.display === "flex") {
+        dropdown.style.display = "none";
+      }
+    }
+  };
+</script>
+
+</body>
+</html>
