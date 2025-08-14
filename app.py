@@ -213,16 +213,22 @@ def beauty():
     return render_template('beauty.html', products=products)
 
 
-
-@app.route('//buy', methods=['POST'])
+@app.route('/buy', methods=['POST'])
 def buy_product():
+    # Check if someone is logged in
     if 'username' not in session:
         flash("Please login to place an order.", "error")
+        return redirect(url_for('user_login'))
+    
+    # Check if the logged-in user is NOT an admin
+    if session.get('role') != 'user':
+        flash("Admins cannot place orders. Please login as a user.", "error")
         return redirect(url_for('user_login'))
 
     product_name = request.form.get('name')
     flash(f"Order placed successfully for {product_name}!", "success")
     return redirect(url_for('place_order'))
+
 
 
 
