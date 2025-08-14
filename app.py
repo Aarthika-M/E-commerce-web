@@ -216,7 +216,7 @@ def beauty():
 
 @app.route('//buy', methods=['POST'])
 def buy_product():
-    if 'user' not in session:
+    if 'username' not in session:
         flash("Please login to place an order.", "error")
         return redirect(url_for('user_login'))
 
