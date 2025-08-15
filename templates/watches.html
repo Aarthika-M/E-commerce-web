@@ -69,15 +69,13 @@
 
     <!-- ✅ Show remove only if role is admin -->
     {% if session.get('role') == 'admin' %}
-    <form method="POST" action="{{ url_for('delete_product', product_id=product._id) }}">
-      <button type="submit" class="remove-btn">🗑 Remove</button>
-    </form>
-    {% endif %}
-  </div>
-  {% endfor %}
-  {% else  %}
-  <h1>No products found</h1>
-  {% endif %}
+<form method="POST" action="{{ url_for('delete_product', product_id=product._id) }}">
+    <button type="submit" class="remove-btn" onclick="return confirm('Are you sure you want to delete this product?')">
+        🗑 Remove
+    </button>
+</form>
+{% endif %}
+
 
 
 </div>

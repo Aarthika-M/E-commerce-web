@@ -7,6 +7,20 @@ from pymongo import MongoClient
 from uuid import uuid4
 import os
 from dotenv import load_dotenv
+import traceback
+from flask import url_for as flask_url_for
+
+def debug_url_for(*args, **kwargs):
+    if args and args[0] == 'categories':
+        print("\n[DEBUG] url_for('categories') was called!")
+        print("Call stack:")
+        traceback.print_stack()
+    return flask_url_for(*args, **kwargs)
+
+# Override url_for for debugging
+import builtins
+globals()['url_for'] = debug_url_for
+
 
 
 load_dotenv()
@@ -84,15 +98,13 @@ def user_login():
 # === Logout ===
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
-    flash('Logged out successfully.', 'info')
-    return redirect(url_for('home'))
+     session.pop('username', None)
+     session.pop('role', None)
 
-@app.route('/categories')
-def category_page():
-    if 'username' in session and session.get('role') == 'user':
-        return render_template('categories.html', username=session['username'])
-    return redirect(url_for('user_login'))
+     flash('Logged out successfully.', 'info')
+     return redirect(url_for('home'))
+
+
 
 
 
@@ -179,14 +191,7 @@ def add_product():
 
     return render_template("add_product.html")
 
-@app.route('/admin/products')
-def admin_products():
-    if session.get('role') != 'admin':
-        flash("Access denied. Admins only.", "error")
-        return redirect(url_for('home'))
 
-    products = products_col.find()
-    return render_template('admin_products.html', products=products)
 
 
 
@@ -286,16 +291,48 @@ def wishlist():
     wishlist_items = session.get('wishlist', [])
     return render_template('wishlist.html', wishlist=wishlist_items)
 
+# ---------- User Categories ----------
+@app.route('/categories')
+def category_page():
+    products = list(db.products.find())
+    return render_template("categories.html", products=products)
 
-@app.route('/delete_product/<product_id>', methods=['POST'])
+# ---------- Admin Products ----------
+@app.route('/admin_products')
+def admin_products():
+    if session.get('role') == 'admin':
+        products = list(db.products.find())
+        return render_template("admin_products.html", products=products)
+    else:
+        flash("Admin login required", "error")
+        return redirect(url_for('category_page'))
+    
+@app.route("/delete_product/<product_id>", methods=["POST"])
 def delete_product(product_id):
     if session.get('role') != 'admin':
         flash("Only admin can delete products.", "error")
         return redirect(url_for('user_login'))
 
-    db.products.delete_one({'_id': ObjectId(product_id)})
-    flash("Product removed successfully!", "success")
-    return redirect(url_for('watches')) 
+    product = db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        flash("Product not found.", "error")
+        return redirect(url_for('dresses'))  # fallback
+
+    db.products.delete_one({"_id": ObjectId(product_id)})
+    flash(f"{product['name']} removed successfully!", "success")
+
+    # Redirect to the category page of the deleted product
+    category = product.get('category', 'dresses').lower()
+    if category == 'watches':
+        return redirect(url_for('watches'))
+    elif category == 'dresses':
+        return redirect(url_for('dresses'))
+    elif category == 'beauty':
+        return redirect(url_for('beauty'))
+    else:
+        return redirect(url_for('category_page'))  # fallback
+
+
 
 @app.route('/product/<product_id>')
 def view_product_detail(product_id):
@@ -310,6 +347,7 @@ def view_product_detail(product_id):
 
 
 # === Run Server === #
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Use Render's assigned port
-    app.run(host="0.0.0.0", port=port, debug=True)
+
+if __name__ == '__main__' and os.environ.get("VERCEL") is None:
+    # Only run locally if not on Vercel
+    app.run(debug=True)
